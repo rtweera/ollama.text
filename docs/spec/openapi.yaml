@@ -465,6 +465,10 @@ components:
           type: boolean
           description: Indicates if this is the final response in the stream.
           example: false
+        done_reason:
+          type: string
+          description: Reason for completion (e.g., "stop").
+          example: "stop"
         context:
           type: array
           items:

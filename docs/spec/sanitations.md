@@ -45,6 +45,14 @@ These changes are done in order to improve the overall usability, and as workaro
 
    - **Reason**: This is done to improve the usability of the generated client. The generated client will have better error handling with these additional response codes.
 
+5. Add `done_reason` to `GenerateStreamResponse` object
+
+   - **Original**: The original OpenAPI spec did not include `done_reason` in the `GenerateStreamResponse` object.
+
+   - **Updated**: Added `done_reason` to the `GenerateStreamResponse` object.
+
+   - **Reason**: `done_reason` is provided in the last response from the server.
+
 ## OpenAPI cli command
 
 The following command was used to generate the Ballerina client from the OpenAPI specification. The command should be executed from the repository root directory.
