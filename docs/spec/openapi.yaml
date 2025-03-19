@@ -267,6 +267,30 @@ paths:
                     prompt_eval_duration: 107345000
                     eval_count: 237
                     eval_duration: 4289432000
+        '400':
+          description: Bad Request. Returned when the request is malformed or invalid (e.g., missing required fields).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "invalid request: 'model' field is required"
+        '404':
+          description: Not Found. Returned when the specified model does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "model 'llama3.2:3b' not found"
+        '500':
+          description: Internal Server Error. Returned when an unexpected error occurs on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "internal server error: failed to load model"
 components:
   schemas:
     GenerateRequest:
@@ -537,3 +561,12 @@ components:
           format: int64
           description: Time spent generating the response in nanoseconds.
           example: 4709213000
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: A human-readable error message.
+          example: "model 'llama3.2:3b' not found"

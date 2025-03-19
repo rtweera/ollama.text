@@ -37,6 +37,14 @@ These changes are done in order to improve the overall usability, and as workaro
 
    - **Reason**: Original `date-time` format is not supported in Ballerina.
 
+4. Add `400`, `404`, `500` response codes
+
+   - **Original**: The original OpenAPI spec only included `200` response code for the endpoints.
+
+   - **Updated**: Added `400`, `404`, `500` response codes to the OpenAPI spec.
+
+   - **Reason**: This is done to improve the usability of the generated client. The generated client will have better error handling with these additional response codes.
+
 ## OpenAPI cli command
 
 The following command was used to generate the Ballerina client from the OpenAPI specification. The command should be executed from the repository root directory.
