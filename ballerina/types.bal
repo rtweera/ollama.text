@@ -58,6 +58,8 @@ public type GenerateStreamResponse record {
     string response;
     # Indicates if this is the final response in the stream.
     boolean done;
+    # Reason for completion (e.g., "stop").
+    string done_reason?;
     # Conversational context encoding (only in final response if not in raw mode).
     int[] context?;
     # Total time spent generating the response in nanoseconds (final response only).
