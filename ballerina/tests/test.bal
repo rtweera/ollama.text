@@ -27,12 +27,19 @@ configurable boolean isLiveServer = os:getEnv("IS_LIVE_SERVER") == "true";
 const string llama3_2 = "llama3.2";
 const string mistral = "mistral";
 const string deepseek = "deepseek-r1";
+const string llava = "llava";
 const string incorrectModel = "model_xyz";
 const string suffix = "Ends your answer with `I am fine.`";
 const string prompt = "Hello, how are you?";
-
+const string personPrompt = "Tell me about an imaginary person named " + personName + " who is " + personAge + " years old. Give me the answer in structured format.";
+const string personName = "John Doe";
+const string personAge = "30";
 GenerateRequest request = {
     model: llama3_2
+};
+type Person record {
+    string name;
+    int age;
 };
 
 final Client ollama = check initClient();
@@ -44,6 +51,12 @@ isolated function initClient() returns Client|error {
         }, liveServerUrl);
     }
     return check new ({}, mockServerUrl);
+}
+
+@test:BeforeSuite
+function beforeSuite() returns error? {
+    // TODO: Need to check the availabiilty of the needed ollama models before running the tests. This has to be done
+    // through the ollama.manage connector, which is yet to be implemented.
 }
 
 @test:Config {
@@ -87,7 +100,7 @@ function testStreamResponse() returns error? {
         prompt: prompt,
         'stream: true
     };
-    anydata|GenerateStreamResponse|GenerateSingleResponse|error response = ollama->/generate.post(request);
+    GenerateStreamResponse|GenerateSingleResponse|error response = ollama->/generate.post(request);
     io:println("Response: ", response);
     test:assertTrue(response is GenerateStreamResponse, "Error generating stream response");
     if response is GenerateStreamResponse {
@@ -164,5 +177,49 @@ function testSingleResponseWithJsonFormatFails() returns error? {
     if response is GenerateSingleResponse {
         json|error jsonParsed = response.response.fromJsonString();
         test:assertFalse(jsonParsed is json, "Response.response should be JSON");
+    }
+}
+
+@test:Config {
+    groups: ["positive_tests", "generation", "stream_response", "structured_response"]
+}
+function testSingleResponseWithJsonSchema() returns error? {
+    request = {
+        model: llama3_2,
+        prompt: personPrompt,
+        'stream: false,
+        format: {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"},
+                "age": {"type": "integer"}
+            }
+        }
+    };
+
+    GenerateStreamResponse|GenerateSingleResponse|error response = ollama->/generate.post(request);
+    test:assertTrue(response is GenerateSingleResponse, "Error generating single response with format schema");
+    if response is GenerateSingleResponse {
+        io:println("Response: ", response.response);    // TODO: remove this 
+        Person|error person = response.response.fromJsonStringWithType(Person);
+        test:assertTrue(person is Person, "person should be of type Person");
+    }
+}
+
+@test:Config {
+    groups: ["positive_tests", "generation", "stream_response", "multimodal"]
+}
+function testSingleResponseWithImages() returns error? {
+    request = {
+        model: llava,
+        prompt: "what is in this image?",
+        'stream: false,
+        images: getImages()
+    };
+    GenerateStreamResponse|GenerateSingleResponse|error response = ollama->/generate.post(request);
+    io:println("Response: ", response);
+    test:assertTrue(response is GenerateSingleResponse, "Error generating single response with images");
+    if response is GenerateSingleResponse {
+        test:assertNotEquals(response.response, "", "Response.response can't be empty");
     }
 }
